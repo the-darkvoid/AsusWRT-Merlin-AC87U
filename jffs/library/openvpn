@@ -1,0 +1,13 @@
+#!/bin/sh
+
+### OpenVPN Clients
+
+# Install tun device
+modprobe tun
+
+# Load Asia-Pacific VPN
+/usr/sbin/openvpn --config /jffs/library/openvpn-ap.conf --daemon
+
+# Load Europe VPN
+/usr/sbin/openvpn --config /jffs/library/openvpn-eu.conf --daemon
+
