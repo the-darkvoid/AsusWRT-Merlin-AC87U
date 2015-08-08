@@ -2,3 +2,7 @@
 jffs/library/openvpn-ap.conf
 
 jffs/library/openvpn-eu.conf
+
+library/openvpn-ap.conf
+
+library/openvpn-eu.conf
