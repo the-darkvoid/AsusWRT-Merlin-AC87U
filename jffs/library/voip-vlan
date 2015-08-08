@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ -z "$(pidof udhcpc)" ] 
+then
+	### Place physical port 4 into a seperate VLAN 4
+	# Physical ports 1-3 on vlan 1
+	robocfg vlan 1 ports "2 3 5u 7t"
+	# Physical port 4 to vlan 4
+	robocfg vlan 4 ports "1 7t"
+	# Add vlan 4 to eth0
+	ip link add link eth0 name eth0.4 type vlan id 4
+	# Enable interface vlan 4
+	ip link set dev eth0.4 address AC:9E:17:94:B0:44
+	ip link set dev eth0.4 up
+	# Set appropriate firewall rules for new eth0.4
+	iptables -I FORWARD -i eth0.4 -m state --state NEW -j ACCEPT
+	iptables -I FORWARD -i eth0.4 -o br0 -m state --state NEW -j DROP
+	iptables -I FORWARD -i br0 -o eth0.4 -m state --state NEW -j DROP
+	iptables -I INPUT -i eth0.4 -j ACCEPT
+
+	### Use dhcp to request an ip for vlan 4
+	udhcpc --background --interface eth0.4 /var/run/udhcpc-vlan4.pid --script /jffs/library/udhcpc-vlan4
+fi
+
