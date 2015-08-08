@@ -1,0 +1,10 @@
+#!/bin/sh
+
+ROOT=/jffs/configs
+
+# Update latest adblock hosts, replacing 0.0.0.0 / 127.0.0.1 with our adblock server ip of 192.168.254.254
+wget -qO- -i ${ROOT}/adblock.urls | grep '^0.0.0.0\|^127.0.0.1' | grep -E -v -f ${ROOT}/adblock.domains | sed $'s/\r$//;s/0.0.0.0\|127.0.0.1/192.168.254.254/' | sort -u > ${ROOT}/adblock.hosts
+sleep 5
+
+# Reload dnsmasq hosts
+killall -HUP dnsmasq
