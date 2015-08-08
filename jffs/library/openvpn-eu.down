@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Disable machines behind the router to access the clients in VPN network
+/usr/sbin/iptables -D POSTROUTING -t nat -o $dev -j MASQUERADE
+
+# Disable the clients in the VPN network to access the router
+/usr/sbin/iptables -D INPUT -t filter -i $dev -j ACCEPT
+
+#
+# Delete and table 100 and flush any existing rules if they exist.
+#
+ip route flush table 100
+ip route del default table 100
+ip rule del fwmark 1 table 100
+ip route flush cache
+iptables -t mangle -F PREROUTING
+
+

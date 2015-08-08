@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# Enable machines behind the router to access the clients in VPN network
+/usr/sbin/iptables -I POSTROUTING -t nat -o $dev -j MASQUERADE
+
+# Enable the clients in the VPN network to access the router
+/usr/sbin/iptables -I INPUT -t filter -i $dev -j ACCEPT
+
+# This script configures "selective" VPN routing. Normally Tomato will route ALL traffic out
+# the OpenVPN tunnel. These changes to iptables allow some outbound traffic to use the VPN, and some
+# traffic to bypass the VPN and use the regular Internet instead.
+#
+#  To list the current rules on the router, issue the command:
+#      iptables -t mangle -L PREROUTING
+#
+#  Flush/reset all the rules to default by issuing the command:
+#      iptables -t mangle -F PREROUTING
+#
+
+#
+# First it is necessary to disable Reverse Path Filtering on all
+# current and future network interfaces:
+#
+for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+  echo 0 > $i
+done
+
+#
+# Delete and table 100 and flush any existing rules if they exist.
+#
+ip route flush table 100
+ip route del default table 100
+ip rule del fwmark 1 table 100
+ip route flush cache
+iptables -t mangle -F PREROUTING
+
+#
+# Copy all non-default and non-PPP related routes from the main table into table 100.
+# Then configure table 100 to route all traffic out the VPN gateway and assign it mark "1"
+#
+# NOTE: Here I assume the OpenVPN tunnel is named "tun0".
+#
+#
+ip route show table main | grep -Ev ^default | grep -Ev ppp \
+  | while read ROUTE ; do
+      ip route add table 100 $ROUTE
+done
+
+ip route add default table 100 via $route_vpn_gateway
+ip route add $route_network_1 table 100 via $route_vpn_gateway
+ip rule add fwmark 1 table 100
+ip route flush cache
+
+#
+# Define the routing policies for the traffic. The rules will be applied in the order that they
+# are listed. In the end, packets with MARK set to "0" will pass through the WAN. If MARK is set
+# to "1" it will route through the VPN.
+#
+# EXAMPLES:
+#
+#  All LAN traffic will bypass the VPN (Useful to put this rule first, so all traffic bypasses the VPN and you can configure exceptions afterwards)
+#    iptables -t mangle -A PREROUTING -i br0 -j MARK --set-mark 0
+#  Ports 80 and 443 will bypass the VPN
+#    iptables -t mangle -A PREROUTING -i br0 -p tcp -m multiport --dport 80,443 -j MARK --set-mark 0
+#  All traffic from a particular computer on the LAN will use the VPN
+#    iptables -t mangle -A PREROUTING -i br0 -m iprange --src-range 192.168.1.2 -j MARK --set-mark 1
+#  All traffic to a specific Internet IP address will use the VPN
+#    iptables -t mangle -A PREROUTING -i br0 -m iprange --dst-range 216.146.38.70 -j MARK --set-mark 1
+#  All UDP and ICMP traffic will bypass the VPN
+#    iptables -t mangle -A PREROUTING -i br0 -p udp -j MARK --set-mark 0
+#    iptables -t mangle -A PREROUTING -i br0 -p icmp -j MARK --set-mark 0
+
+# By default all traffic bypasses the VPN
+iptables -t mangle -A PREROUTING -i br0 -j MARK --set-mark 0
+
+# Traffic to the VPN network itself should go through the VPN
+iptables -t mangle -A PREROUTING -i br0 -m iprange --dst-range 192.168.200.0-192.168.200.255 -j MARK --set-mark 1
+
+# pbs.gigaset.net & sip.gigaset.net explicitly uses the VPN
+iptables -t mangle -A PREROUTING -i br0 -m iprange --dst-range 148.251.0.0-148.251.255.255 -j MARK --set-mark 1

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Disable machines behind the router to access the clients in VPN network
+/usr/sbin/iptables -D POSTROUTING -t nat -o $dev -j MASQUERADE
+
+# Disable the clients in the VPN network to access the router
+/usr/sbin/iptables -D INPUT -t filter -i $dev -j ACCEPT
+
