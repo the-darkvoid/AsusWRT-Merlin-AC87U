@@ -1,0 +1,2 @@
+UUID=548a473a-b855-422f-bfd1-d1d1d366163d	/tmp/mnt/sda	ext4	rw,nodev,noatime,barrier=1,stripe=128,data=writeback	0 0   
+
