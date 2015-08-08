@@ -2,4 +2,5 @@ library/openvpn-ap.conf
 library/openvpn-eu.conf
 scripts/unmount
 syslog*
+jffs.tar.gz
 
