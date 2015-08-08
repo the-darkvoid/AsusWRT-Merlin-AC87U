@@ -8,4 +8,4 @@ Some of the features are:
  * Pixelserv and dnsmasq to block advertisement domains [source](http://www.snbforums.com/threads/pixelserv-a-better-one-pixel-webserver-for-adblock.26114/)
  * Network PXE booting with iPXE
  * LAN port 4 as additional DHCP WAN port
- * Custom dual OpenVPN tunnel and policy based routing
+ * Custom dual OpenVPN tunnel and policy based routing [source](http://www.snbforums.com/threads/openvpn-selective-routing-and-port-forwarding.25383/)
