@@ -1,0 +1,74 @@
+# Additional DNS masq options
+proxy-dnssec
+domain-needed
+
+except-interface=ppp*
+except-interface=tun*
+except-interface=eth0.4
+
+# Enable TFTP server
+enable-tftp=br0
+tftp-root=/jffs/pxe
+tftp-lowercase		# Convert all filenames to lowercase
+tftp-secure			# Allow only files owned by dnsmasq process
+tftp-no-blocksize	# Disable blocksize for buggy clients
+
+# filenames, the first loads iPXE, and the second tells iPXE what to
+# load. The dhcp-match sets the ipxe tag for requests from iPXE.
+# Important Note: the 'set:' and 'tag:!ipxe' syntax requires dnsmasq 2.53 or above.
+dhcp-match=set:ipxe,175 # iPXE sends a 175 option.
+
+dhcp-match=set:legacy,option:client-arch,0
+dhcp-match=set:efi-32,option:client-arch,6
+dhcp-match=set:efi-64,option:client-arch,7
+
+dhcp-boot=tag:efi-32,tag:!ipxe,snponly-x32.efi
+dhcp-boot=tag:efi-64,tag:!ipxe,snponly-x64.efi
+dhcp-boot=tag:legacy,tag:!ipxe,undionly.kpxe
+
+# iPXE issues a second DHCP request and we then serve boot.ipxe over http
+dhcp-boot=http://nas.lan:8000/pxe/boot.ipxe
+
+# Add additional host entries
+# - Local network
+addn-hosts=/jffs/configs/lan.hosts
+# - Blocked hosts
+addn-hosts=/jffs/configs/blocked.hosts
+# - Blocked advertisement hosts
+addn-hosts=/jffs/configs/adblock.hosts
+
+# Issue ip addresses in 172.16.0.10 - 172.16.0.50 on guest wifi
+interface=br1
+dhcp-range=tag:br1,172.16.0.10,172.16.0.50,255.255.255.0,1440m
+dhcp-option=tag:br1,3,172.16.0.1
+
+# Block well-known level 2 ad server domains
+address=/.302br.net/192.168.254.254
+address=/.2o7.net/192.168.254.254
+address=/.51yes.com/192.168.254.254
+address=/.intellitxt.com/192.168.254.254
+address=/.hitbox.com/192.168.254.254
+address=/.go2cloud.org/192.168.254.254
+address=/.adnxs.com/192.168.254.254
+address=/.adk2.co/192.168.254.254
+address=/.liveadvert.com/192.168.254.254
+address=/.mydas.mobi/192.168.254.254
+address=/.ivwbox.de/192.168.254.254
+address=/.spylog.com/192.168.254.254
+address=/.doubleclick.net/192.168.254.254
+address=/.vmsn.de/192.168.254.254
+address=/.paycount.com/192.168.254.254
+address=/.2mdn.net/192.168.254.254
+address=/.2cnt.net/192.168.254.254
+address=/.focalink.com/192.168.254.254
+address=/.webtrekk.net/192.168.254.254
+address=/.247realmedia.com/192.168.254.254
+address=/.adtech.fr/192.168.254.254
+address=/.zedo.com/192.168.254.254
+address=/.am15.net/192.168.254.254
+address=/.sextracker.com/192.168.254.254
+address=/.fastclick.net/192.168.254.254
+address=/.esomniture.com/192.168.254.254
+address=/.sitemeter.com/192.168.254.254
+address=/.adtech.de/192.168.254.254
+address=/.adform.net/192.168.254.254
