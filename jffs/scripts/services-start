@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#### Initialize Entware
+sleep 10
+/opt/etc/init.d/rc.unslung start
+
+. /jffs/library/cronjobs
+
+#### Kill tftpd and restart dnsmasq for tftp
+killall tftpd
+service restart_dnsmasq

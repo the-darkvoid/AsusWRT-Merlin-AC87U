@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ $1 = "/tmp/mnt/sda" ]
+then
+  mount -o remount /tmp/mnt/sda
+  ln -nsf $1/entware.arm /tmp/opt
+fi
+
+. /jffs/library/offload-jffs
+

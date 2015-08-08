@@ -1,0 +1,10 @@
+#!/bin/sh
+
+### Create mount points for USB
+mkdir -p /tmp/mnt/sda
+
+### Create br1 interface for dnsmasq to listen (172.16.0.1)
+brctl addbr br1
+ip address add 172.16.0.1/24 broadcast 172.16.0.255 dev br1
+ip link set up dev br1
+

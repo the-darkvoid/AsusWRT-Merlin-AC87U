@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Redirect traffic to 192.168.254.254 (non-existent) into pixelserv
+iptables -t nat -I PREROUTING --dest 192.168.254.254 -p tcp -m multiport --dport 80,443 -j DNAT --to-dest 192.168.10.1:8080
+
+# Asterisk TLS listening port
+iptables -I INPUT -p udp --destination-port 41002 -j ACCEPT
+# Asterisk RTP UDP ports
+iptables -I INPUT -p udp --destination-port 19000:20000 -j ACCEPT

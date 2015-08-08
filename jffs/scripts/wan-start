@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Delay until pppd is active
+sleep 60
+
+### OpenVPN Clients
+. /jffs/library/openvpn

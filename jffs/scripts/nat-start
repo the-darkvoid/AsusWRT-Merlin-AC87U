@@ -1,0 +1,7 @@
+#!/bin/sh
+
+### VoIP vlan
+. /jffs/library/voip-vlan
+
+### Isolate guest wifi
+. /jffs/library/isolate-guest-wifi
