@@ -31,17 +31,20 @@ for GuestWifiDevice in $Guest24 $Guest5
 	done
 
 # brctl show
-#
+
 # if guest wifi moved, set some nvram variables and restart eapd to fix security
 if [ "x$lan1names" != "x" ]
 	then
 		nvram set lan_ifnames="vlan1 eth1 wifi0"
 		nvram set lan_ifname="br0"
-
+#
 		nvram set lan1_ifnames="`echo $lan1names | sed 's/^[ \t]*//;s/[ \t]*$//'`"
 		nvram set lan1_ifname="br1"
-
+#
+#		nvram show | grep -i ifname | grep -i lan
+#
    		#  restart eapd
 		killall eapd
 		eapd
 fi
+

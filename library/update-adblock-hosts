@@ -6,5 +6,11 @@ ROOT=/jffs/configs
 wget -qO- -i ${ROOT}/adblock.urls | grep '^0.0.0.0\|^127.0.0.1' | grep -E -v -f ${ROOT}/adblock.domains | sed $'s/\r$//;s/0.0.0.0\|127.0.0.1/192.168.254.254/' | sort -u > ${ROOT}/adblock.hosts
 sleep 5
 
+# remove whitelisted entries in temp and write final file, remove temp file
+#cat $dir/whitelist.txt | sed $'s/\r$//' | grep -vf - $dir/temp > $dir/hosts.blocked
+
+# Remove temp file
+#rm /jffs/configs/adblock.tmp
+
 # Reload dnsmasq hosts
 killall -HUP dnsmasq
