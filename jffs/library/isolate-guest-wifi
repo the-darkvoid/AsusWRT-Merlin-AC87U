@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# get list of configured guest wireless networks
+Guest24=`nvram get wl0_vifs`
+Guest5=`nvram get wl1_vifs`
+#
+#  Move all Guest wireless to br1
+# attempt to move wireless guest fails (no security only works) until restart of eapd below
+#
+lan1names=""
+
+# Drop any new connections from guest wifi to the router
+iptables -I INPUT -i br1 -m state --state NEW -j DROP
+# Allow guest wifi to access DHCP 
+iptables -I INPUT -i br1 -p udp --dport 67 -j ACCEPT 
+# Allow guest wifi to access DNS
+iptables -I INPUT -i br1 -p udp --dport 53 -j ACCEPT 
+iptables -I INPUT -i br1 -p tcp --dport 53 -j ACCEPT 
+
+# Set appropriate firewall rules for new br1
+iptables -I FORWARD -i br1 -m state --state NEW -j ACCEPT
+iptables -I FORWARD -i br1 -o br0 -m state --state NEW -j DROP
+iptables -I FORWARD -i br0 -o br1 -m state --state NEW -j DROP
+
+for GuestWifiDevice in $Guest24 $Guest5
+	do
+		brctl delif br0 $GuestWifiDevice
+		brctl addif br1 $GuestWifiDevice
+		# add name to list with preceding blank
+		lan1names="$lan1names $GuestWifiDevice"
+	done
+
+# brctl show
+#
+# if guest wifi moved, set some nvram variables and restart eapd to fix security
+if [ "x$lan1names" != "x" ]
+	then
+		nvram set lan_ifnames="vlan1 eth1 wifi0"
+		nvram set lan_ifname="br0"
+
+		nvram set lan1_ifnames="`echo $lan1names | sed 's/^[ \t]*//;s/[ \t]*$//'`"
+		nvram set lan1_ifname="br1"
+
+   		#  restart eapd
+		killall eapd
+		eapd
+fi
