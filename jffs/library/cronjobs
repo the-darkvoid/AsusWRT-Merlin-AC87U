@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#### Configure cron jobs
+# Rotate log files daily
+cru a logrotate "0 0 * * * /opt/sbin/logrotate /opt/etc/logrotate.conf &>/dev/null"
+# Reboot the router at 4am
+cru a ScheduledReboot "0 4 * * * /sbin/reboot"
+# Update adblock hosts once a week at 3am
+cru a UpdateHosts "0 3 * * 1 /jffs/scripts/update-hosts"
